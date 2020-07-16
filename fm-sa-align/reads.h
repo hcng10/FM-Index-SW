@@ -88,7 +88,6 @@ class Read_t {
 
                 sub_reads[entry_num].start_pos = start_pos;
 
-                //cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>writing: "<<(int) entry_num <<" start_pos "<<start_pos<<" low "<<low<<" high "<<high<<"\n\n";
             }
             else{
                 sub_reads[entry_num].low = low;
@@ -149,12 +148,6 @@ class Read_t {
 
 void loadReads(FILE *fp, std::vector<Read_t> &reads, char *buffer, uint64_t size_r, bool r_ctrl, uint64_t *bytes);
 uint64_t writeReads(FILE *fp, std::vector<Read_t> &reads, char *buffer);
-
-
-//template <class index_t, class cnt_t>
-//void exactAlign(std::vector<read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t bitCcnt);
-
-
 
 
 #endif //FM_SA_ALIGN_READS_H

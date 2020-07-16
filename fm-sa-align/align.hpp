@@ -89,9 +89,10 @@ void exactSearch(index_t * index,  cnt_t * cnt,
             }
 
             high = high_count + high_bwtcount;
-                    cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
-                                                                            
-            cout<<(int)sym_idx<<"symVal: "<<sym[sym_idx]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
+            //DEBUG BEGIN:
+            //cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";                                                              
+            //cout<<(int)sym_idx<<"symVal: "<<sym[sym_idx]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
+            //DEBUG END:
 
             sym_idx = backward == 1? sym_idx - 1: sym_idx + 1;
 
@@ -154,7 +155,7 @@ void exactAlign(std::vector<Read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t
         }
 
     }else{
-        cout<<"64-bit is to be done later, after LSA";
+        cout<<"64-bit is to be done later";
     }
 
 
