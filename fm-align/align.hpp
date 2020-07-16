@@ -15,22 +15,6 @@ void exactSearch(index_t * index,  cnt_t * cnt,
                 uint32_t bucket_bwt_len, uint32_t endCharBucket, uint32_t endCharBucketi,
                 bool backward) {
 
-    //uint8_t offset = (uint8_t) (read_len % 2);
-    /*uint8_t val_i;
-    switch (sym[read_len-1]) {
-        case 'A' : val_i = 0; break;
-        case 'C' : val_i = 1; break;
-        case 'G' : val_i = 2; break;
-        case 'T' : val_i = 3; break;
-        default  : val_i = 0;
-    }*/
-
-
-    //These low and high refers to the starting and ending position for a character
-    //uint32_t low = offset == 0 ? 0 : cnt[val_i];
-    //uint32_t high = offset == 0 ? cnt[FM_BP_RANGE] - 1: cnt[val_i+1] - 1;
-
-    //uint32_t low = cnt[val_i];
     uint32_t low = 0;
     uint32_t high = cnt[4];
 
@@ -85,14 +69,11 @@ void exactSearch(index_t * index,  cnt_t * cnt,
         //handle endchar, as it will add 1 for 'A', because in the index $ and A are both represented as 00
         if (endCharBucket == low_addr &&  endCharBucketi < low_idx && val == 0) {
             low_bwtcount--;
-            //cerr<<"deduct A\n";
         }
-        //cerr<<"endChBucket "<<endCharBucket<<"endCharBucketi "<<endCharBucketi<<"\n";
+
 
 
         low = low_count + low_bwtcount;
-
-        //cerr<<"chance to work here char: "<<(int) val<<" low_addr: "<<low_addr<<" low_idx "<<(int) low_idx<<" low_count "<<low_count<<" low_bwtcount "<<low_bwtcount<<" new low"<<low<<"\n";
 
         uint32_t high_addr = high / bucket_bwt_len;
         uint32_t high_idx = high % bucket_bwt_len;
@@ -106,16 +87,11 @@ void exactSearch(index_t * index,  cnt_t * cnt,
         }
 
         high = high_count + high_bwtcount;
-                cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
 
-        //cerr<<" chance to work here char: "<<(int) val<<" high_addr: "<<high_addr<<" high_idx "<<(int) high_idx<<" high_count "<<high_count<<" high_bwtcount "<<high_bwtcount<<" new_high "<<high<<"\n";
-        //cout<<"\n";
-
-                                           //cout<<" low: "<<(int)low_count<<" + "<<(int)low_bwtcount<<" = "<<(int) low<<" high: "<<(int)high_count<<" + "<<(int)high_bwtcount<<" = "<<(int)high<< " "<<sym[i - 1]<<" "<<"    ...  "<<"low_addr: "<<low_addr<<" low_idx "<<low_idx<<" high_idx "<<high_idx<<" high_addr: "<<high_addr<<"\n";
-        //<<same_bucket<<"  "<<(int)read_len<<"\n";
-                                                                        //
-         cout<<"symVal: "<<sym[i - 1]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
-       
+        //DEBUG START        
+        cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
+        cout<<"symVal: "<<sym[i - 1]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
+        //DEBUG END   
 
         if (low >= high)
             return;
@@ -167,7 +143,7 @@ void exactAlign(std::vector<read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t
         }
 
     }else{
-        cout<<"64-bit is to be done later, after LSA";
+        cout<<"64-bit is to be done later";
     }
 
 

@@ -122,20 +122,11 @@ int main(int argc, char *argv[]) {
             readFile(FM_fp, & idx32[i], FM_BP_RANGE * 4 + BWT32_LEN_BYTE);
         }
 
-        //readFile(FM_fp, idx32, f_size - sizeof(uint64_t) * (FM_BP_RANGE + 1));
-        //cerr<<"f_size - sizeof(uint64_t) * (FM_BP_RANGE + 1) "<< sizeof(index32_t) <<" "<< fseek(FM_fp, 0, SEEK_CUR)<<"\n";
-
-        //cout<<"n_buckets "<<n_buckets<<" fmt_len "<<fmt_len<<" bucket_bwt_len "<<bucket_bwt_len<<"\n\n";
-
-        //cout<<"f_size: "<<f_size<<"Data structure size: "<<n_buckets*sizeof(index32_t);
         bitCcnt = 32;
 
         for (int c=0;c<4;c++){
             cout<<"The c index"<<(int)c<<" index: "<<(int) idx32[0].count[c]<<"\n";
         }
-
-        //for (int b=0;b<(BUCKET_SIZE - 32 * FM_BP_RANGE / 8);b++)
-            //cout<<"The final "<<(int)b<<" val "<<std::bitset<8>(idx32[0].bwt[b])<<"\n";
 
     }
 
@@ -157,9 +148,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    for (int i= 0; i<fmt_len; i++){
-        cout<<"SA "<<sai[i]<<"\n";
-    }
 
     fclose(FM_SA);
     printf("OK!\n");
