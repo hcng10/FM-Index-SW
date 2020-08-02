@@ -42,7 +42,7 @@ void write_meta(FILE * FM_meta_fp,
                 uint32_t bucket_bwt_len, 
                 bool wpad,
                 uint32_t pad_size, 
-                uint64_t* endCharPos,
+                uint64_t* end_char_pos,
                 uint8_t * endChar ){
 
     if (FM_STEP > 1){
@@ -51,14 +51,14 @@ void write_meta(FILE * FM_meta_fp,
         writeFile(FM_meta_fp, &fm_step, sizeof(uint8_t));
         
         for (uint8_t s = 0; s < FM_STEP; s++){
-            writeFile(FM_meta_fp, endCharPos + s, sizeof(uint64_t));
+            writeFile(FM_meta_fp, end_char_pos + s, sizeof(uint64_t));
         }
 
         for (uint8_t s = 0; s < FM_STEP * FM_STEP; s++){
             writeFile(FM_meta_fp, endChar + s, sizeof(uint8_t));
         }
     }else{
-        writeFile(FM_meta_fp, &endCharPos, sizeof(uint64_t));
+        writeFile(FM_meta_fp, end_char_pos, sizeof(uint64_t));
     }
 
     writeFile(FM_meta_fp, &fmt_len, sizeof(uint64_t));
@@ -85,7 +85,17 @@ void write_meta(FILE * FM_meta_fp,
 }
 
 
-// set value in packed bwt
+/**
+    First it determines the offset inside the bucket bwt. Then it mod i by 4 bits,
+    as the BWT uses uint8_t array to hold the compressed BWT. It needs to know
+    how many bits should be shifted
+
+
+    @param  *bwt    to be assigned compressed BWT within a bucket
+    @param  val     current BWT value at i
+    @param  bucket_bwt_len    length of a bucket
+    @param  i                 current index, 32bit or 64bit
+*/
 template <typename T_width>
 inline void bucket_setVal(uint8_t *bwt, uint8_t val, uint32_t bucket_bwt_len, T_width i) {
 
@@ -104,13 +114,10 @@ inline void bucket_setVal(uint8_t *bwt, uint8_t val, uint32_t bucket_bwt_len, T_
 
     if (cur_mod < next_mod | 8 % (uint32_t) pow(FM_BP_BIT, FM_STEP) == 0){
 
-        // if it is smaller, that means u don't have to get across two elements
-        //TODO: The end char $ sign is not considered
+        // if it is smaller, that means you don't have to get across two elements
         val_sft = val << cur_mod;//lsb, bwt in smaller position
         bwt[bucket_bwt_offset] |= val_sft;
 
-
-        //cout<<"The final "<<(int)i<<" val "<<std::bitset<8>(bwt[bucket_bwt_offset])<<"\n";
 
     }else{
         // if it is bigger, that means u have a situation, need to store it across two elements
@@ -122,13 +129,17 @@ inline void bucket_setVal(uint8_t *bwt, uint8_t val, uint32_t bucket_bwt_len, T_
 
     }
 
-
-
-    //printf("i %d bucket_bwt_len %d bucket_bwt_offset %d bucket_bwt_sft %d  ",(uint32_t) i, bucket_bwt_len, bucket_bwt_offset, cur_mod);
-    //cout<<"val_sft "<<std::bitset<8>(val_sft) <<" bwt_val-inside "<<std::bitset<8>(bwt[bucket_bwt_offset]) << std::endl;
-
 }
 
+
+/**
+    With a loop boundary of FM_BP_RANGE^STEP_SIZE + 1, it checks which
+    entry of i(n) to increment, by comparing to the permutation: struct BP_t
+
+    @param  i       current i when looping across the BWT
+    @param  bwt     compressed BWT
+    @param  *bp_prmtn    the precomputed permutation for i(n)
+*/
 inline uint8_t  bwt_prmut_cmp(uint64_t i, BP_t * bwt, BP_t * bp_prmtn){
     uint8_t rtn_val = 0;
 
@@ -153,7 +164,7 @@ inline uint8_t  bwt_prmut_cmp(uint64_t i, BP_t * bwt, BP_t * bp_prmtn){
     return rtn_val;
 }
 
-inline BP_t * gen_bp_prmut(BP_t* bwt, uint64_t* endCharPos){
+inline BP_t * gen_bp_prmut(BP_t* bwt, uint64_t* end_char_pos){
 
     // generate all the permutation
     char bp_end = '$';
@@ -177,8 +188,8 @@ inline BP_t * gen_bp_prmut(BP_t* bwt, uint64_t* endCharPos){
     }
 
     for (uint8_t s = 0; s < FM_STEP; s++ ){
-        bp_prmtn[s].bp[0] = bwt[endCharPos[s]].bp[0];
-        bp_prmtn[s].bp[1] = bwt[endCharPos[s]].bp[1];       
+        bp_prmtn[s].bp[0] = bwt[end_char_pos[s]].bp[0];
+        bp_prmtn[s].bp[1] = bwt[end_char_pos[s]].bp[1];       
     }
 
 
@@ -193,9 +204,9 @@ inline BP_t * gen_bp_prmut(BP_t* bwt, uint64_t* endCharPos){
     }
 
     for (uint8_t s = 0; s < FM_STEP; s++ ){
-        bp_prmtn[s].bp[0] = bwt[endCharPos[s]].bp[0];
-        bp_prmtn[s].bp[1] = bwt[endCharPos[s]].bp[1];  
-        bp_prmtn[s].bp[2] = bwt[endCharPos[s]].bp[2];      
+        bp_prmtn[s].bp[0] = bwt[end_char_pos[s]].bp[0];
+        bp_prmtn[s].bp[1] = bwt[end_char_pos[s]].bp[1];  
+        bp_prmtn[s].bp[2] = bwt[end_char_pos[s]].bp[2];      
     }
     
 
@@ -207,18 +218,25 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
 
     int n_threads = omp_get_max_threads();
 
+    // suffix array
     int64_t *sai = NULL;
+
+    // BWT in char and in binary
     BP_t * bwt = NULL;
     uint8_t * bwtM = NULL;
 
     uint32_t bucket_bwt_len;
     uint32_t n_buckets;
 
+    // bool to indicate if 32bit is enough to hold the BWT of reference
     bool c32;
+
+    // A bucket
     Index_t <u_int64_t> *bucket_indx_c64 = 0;
     Index_t <u_int32_t> *bucket_indx_c32 = 0;
 
-    uint64_t endCharPos[FM_STEP] = {0};
+    // Marker for $ pos
+    uint64_t end_char_pos[FM_STEP] = {0};
 
 #if FM_STEP == 1
     uint8_t endChar[1] = {0};
@@ -251,9 +269,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     bwtM = new uint8_t [fmt_len];
 
 
-
     if (!bwt || !bwtM) {
-
         fprintf(stderr, "error: unable to allocate memory for BWT!\n");
         exit(1);
     }
@@ -264,8 +280,10 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
         uint8_t val = 0;
 
         //bwt[i] = sai[i] > 0 ? fmt[sai[i]-1] : fmt[fmt_len-1+sai[i]];
+        // Obtain the BWT depending on the step size
         for (uint8_t s = 0; s < FM_STEP; s++){
             if (s == 0){
+                // Go to the location pointed by SA, get the nucleotide right before
                 bwt[i].bp[s] = sai[i] > 0 ? fmt[sai[i]-1-s] : fmt[fmt_len-1-s];
             }
             else if (s == 1){
@@ -276,6 +294,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
             }
         }
 
+        // Compression, assign BWT nucleotide with 0 -> 3, random value for $
         for (uint8_t s = 0; s < FM_STEP; s++){
             if (s == 0){
                 switch(bwt[i].bp[s]) {
@@ -285,7 +304,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
                     case 'T': val = 3;  break;
                     case '$':
                         val += 16;
-                        endCharPos[s] = i;
+                        end_char_pos[s] = i;
                         break;
                     default:
                         break;
@@ -299,7 +318,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
                     case 'T': val += 3 * (uint8_t) pow(FM_BP_RANGE, s);  break;
                     case '$':
                         val += 16;
-                        endCharPos[s] = i;
+                        end_char_pos[s] = i;
                         break;
                     default:
                         break;
@@ -314,7 +333,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
         for (uint8_t si = 0; si < FM_STEP; si++){
             
             uint8_t val = 0;
-            switch(bwt[endCharPos[s]].bp[si]) {
+            switch(bwt[end_char_pos[s]].bp[si]) {
                 case 'A': val = 0;  break;
                 case 'C': val = 1;  break;
                 case 'G': val = 2;  break;
@@ -328,14 +347,16 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     }
 
 
-    // compute counters
+    // compute i(n) 
     uint64_t cnt[FM_I_NUM + FM_STEP] = {0};
 
-    BP_t* bp_prmtn = gen_bp_prmut(bwt, endCharPos);
+    // generate all the permutation of i(n) 
+    BP_t* bp_prmtn = gen_bp_prmut(bwt, end_char_pos);
 
     for (uint64_t i = 0; i < fmt_len; i++) {
         uint8_t val = 0;
 
+        // get the entry number for i(n) that I need to increment
         val = bwt_prmut_cmp(i, bwt, bp_prmtn);
         cnt[val]++;
     }
@@ -343,7 +364,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     //free up some of the memory
     delete bwt;
 
-    // sum counters, needs to do from the end
+    // sum counters, need to do from the end
     for (int i = FM_I_NUM + FM_STEP - 1; i > 0; i--)
         cnt[i] = sumArray(cnt, i);
     cnt[0] = 0;
@@ -379,13 +400,13 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
         exit(1);
     }
 
-    //calculate the closest power of 2
+    // calculate the closest power of 2
     if (wpad == true) {
         uint32_t bucket_bwt_len_power = (uint32_t)floor(log(float(bucket_bwt_len))/log(2.0));
         bucket_bwt_len = 1 << bucket_bwt_len_power;
     }
     else{
-        // pop counter can only do one for every 64
+        // pop counter on FPGA can only do one for every 64 entries
         bucket_bwt_len = (bucket_bwt_len / 64 ) * 64;
     }
 
@@ -402,14 +423,15 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     //3. build the index
 
     //calclate exactly how big the bwt array should be for type uint8_t
-    uint32_t bwt_length_uint8 = (bucket_bwt_len * FM_BP_BIT)/8;
+    uint32_t bwt_length_uint8 = (bucket_bwt_len * FM_BP_BIT) / 8;
     if ((bucket_bwt_len * FM_BP_BIT) % 8 > 0) bwt_length_uint8++;
 
     printf("\t Number of buckets %d: \n", n_buckets);
     printf("\t Byte needed for each BTW in a bucket: %d\n", bwt_length_uint8);
-    //printf("The length of the reference: %ld\n", fmt_len);
+
 
     if (c32) {
+        // declare and initalize a bucket object
         bucket_indx_c32 = new Index_t<uint32_t>[n_buckets];
         memset(bucket_indx_c32, 0, n_buckets * sizeof(bucket_indx_c32));
 
@@ -421,6 +443,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
                 // this should prevent the seg fault when accessing
                 bucket_indx_c32[bucket_i].initalize(bwt_length_uint8);
 
+                // assign the value for i(n) within a bucket
                 for (int j = 0; j < FM_I_NUM; j++){
                     bucket_indx_c32[bucket_i].count[j] = cnt_tmp[j] + cnt[j];
                 }
@@ -464,7 +487,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
                 c32, fmt_len, 
                 bwt, bucket_bwt_len, 
                 wpad, pad_size, 
-                endCharPos,
+                end_char_pos,
                 endChar);
 
     delete [] bp_prmtn;

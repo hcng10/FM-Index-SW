@@ -6,9 +6,9 @@
 
 #include "iostream"
 
-// format FASTA file
-void faToFmt(FILE *fasta_fp, FILE * N_fp, char *fmt, uint8_t bit_for_bp, uint64_t & fmt_cnt,
-                        uint64_t & ref_cnt, uint64_t & N_cluster){
+void faToFmt(FILE *fasta_fp, FILE * N_fp, char * fmt, 
+                    uint8_t bit_for_bp, uint64_t & fmt_cnt,
+                    uint64_t & ref_cnt, uint64_t & N_cluster){
 
     // all the counting starts from zero
     char line[LINE_SIZE];
@@ -30,7 +30,8 @@ void faToFmt(FILE *fasta_fp, FILE * N_fp, char *fmt, uint8_t bit_for_bp, uint64_
                     un_cnt++;
 
                 } else {
-                    // find an actual nucleotide, write the previously found N char into file
+                    // find an actual nucleotide, write the previously 
+                    // found N nucleotide into file
                     fmt[fmt_cnt] = sym;
                     if (un_cnt > 0) {
                         writeNinfo(N_fp, ref_cnt - un_cnt, fmt_cnt, un_cnt);
@@ -56,10 +57,12 @@ inline void setVal(uint8_t *pck, uint64_t idx, uint8_t idx_bp_range, uint8_t val
   pck[idx] |= tmp;
 }
 
+
 void packSymbols(char *sym, uint8_t *pck, uint8_t len){
 
     int n_threads = omp_get_max_threads();
     #pragma omp parallel for num_threads(n_threads)
+
     for (uint64_t i = 0; i < CEIL(len, FM_BP_RANGE); i++){
         for (uint8_t j = 0; j < FM_BP_RANGE; j++){
             switch(sym[i * FM_BP_RANGE + j]) {

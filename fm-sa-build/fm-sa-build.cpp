@@ -22,12 +22,18 @@ void reverse(char *fmt, uint32_t len);
 
 int main(int argc, char *argv[]) {
 
-    string ext = "ral";//stands for reconfigurable alignment
+    // stands for reconfigurable alignment
+    string ext = "ral";
 
+    // the input refernce fasta file
     FILE * fasta_fp = NULL;
+
+    // temp storage for the format, in char 
     char * fmt = NULL;
+    // convert the nucleotide to 2 bits, pack them
     uint8_t * pck_fmt = NULL;
 
+    // file descriptor for the output files
     FILE * N_fp = NULL;
     FILE * FM_fp = NULL;
     FILE * FM_meta_fp = NULL;
@@ -41,6 +47,7 @@ int main(int argc, char *argv[]) {
 
     FILE * ref_bin_fp = NULL;
 
+    // fmt_len is the length of the reference without the N nucleotide
     uint64_t fmt_len = 0;
     uint64_t ref_len = 0;
     uint64_t N_cluster = 0;
@@ -57,7 +64,7 @@ int main(int argc, char *argv[]) {
     // Forward reference
     // 1: FM-index in bucket format
     // 2: Meta file, e.g. endCharPos, fmt_len...
-    // 3: Info for N char: pos, length...
+    // 3: Info for N nucleotide: pos, length...
     // Reverse reference
     // Same for 4-6
     //
@@ -88,7 +95,7 @@ int main(int argc, char *argv[]) {
     openFile(&fasta_fp, s_in, "r");
     uint64_t fa_len = fileSizeBytes(fasta_fp);
 
-    // Malloc: newly created char array to hold all the characters
+    // new char array to hold all the nucleotide, 1 byte 1 nucleotide
     fmt = new char [fa_len];
     if (!fmt){
         fprintf(stderr, "error: unable to allocate memory for reference sequence!\n");
@@ -104,13 +111,14 @@ int main(int argc, char *argv[]) {
 
     printf("\tOriginal Reference + '$' Length: %ld\n", ref_len+1);
     printf("\tConstructed Reference + '$' Length: %ld\n", fmt_len);
-    printf("\tNumber of N character clusters: %ld\n", N_cluster);
+    printf("\tNumber of N nucleotide clusters: %ld\n", N_cluster);
         
     printf("FINISH ---> Getting reference\n\n");fflush(stdout);
     
     // 2. Store up the sequence in binary format
     //      Only need to store the forward part as it is used in Smith-Waterman only
-    printf("Converting reference into binary ... "); fflush(stdout);
+    printf("Converting reference into binary ... \n"); fflush(stdout);
+    
     pck_fmt = new uint8_t[CEIL(fmt_len-1, FM_BP_RANGE)];
     memset(pck_fmt, 0, CEIL(fmt_len-1, FM_BP_RANGE) * sizeof(uint8_t));
     packSymbols(fmt, pck_fmt, fmt_len-1);

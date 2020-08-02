@@ -14,23 +14,25 @@ void openFile(FILE **fp, string f_name, const char *mode) {
     }
 }
 
-// get file size in bytes
-uint64_t fileSizeBytes(FILE *fp)
-{
+uint64_t fileSizeBytes(FILE *fp){
+
     struct stat st;
     uint64_t len;
     int fd;
 
+    // map a stream pointer to a file descriptor
     if ((fd = fileno(fp)) == -1) {
         printf("error: unable to get file size!\n");
         exit(1);
     }
 
+    // get file status
     if(fstat(fd, &st)) {
         printf("error: unable to get file size!\n");
         exit(1);
     }
 
+    // get the total size in byte
     len = st.st_size;
 
     return len;
@@ -44,14 +46,8 @@ void writeFile(FILE *fp, void *data, uint64_t n_bytes)
     }
 }
 
-uint64_t writeNinfo(FILE *fp, u_int64_t ref_cnt, u_int64_t fmt_cnt, u_int32_t un_cnt){
+void writeNinfo(FILE * fp, u_int64_t ref_cnt, u_int64_t fmt_cnt, u_int32_t un_cnt){
 
-    //printf("%ld, %ld, %d  %ld  %ld  %ld\n", ref_cnt, fmt_cnt, un_cnt, sizeof(u_int64_t), sizeof(u_int64_t), sizeof(u_int32_t));
-    
-    //Recording info: 
-    // 1. the starting point of N chars in the original reference
-    // 2. the point where N char got cut off and replaced with actual nucleotie
-    // 3. Numner of N chars
     fwrite(&ref_cnt, sizeof(char), sizeof(u_int64_t), fp);
     fwrite(&fmt_cnt, sizeof(char), sizeof(u_int64_t), fp);
     fwrite(&un_cnt, sizeof(char), sizeof(u_int32_t), fp);
