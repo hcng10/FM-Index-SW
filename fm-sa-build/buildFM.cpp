@@ -76,8 +76,6 @@ void write_meta(FILE * FM_meta_fp,
 
     writeFile(FM_meta_fp, &bucket_bwt_len, sizeof(uint32_t));
 
-    //uint32_t cbit =  c32 ? 32: 64;
-    //uint32_t bucket_bwt_pad = bucket_size * 8 - BP_range * cbit - bucket_bwt_len * BP_bit;
 
     writeFile(FM_meta_fp, &pad_size, sizeof(uint32_t));
     writeFile(FM_meta_fp, &wpad, sizeof(bool));
@@ -402,7 +400,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
 
     // calculate the closest power of 2
     if (wpad == true) {
-        uint32_t bucket_bwt_len_power = (uint32_t)floor(log(float(bucket_bwt_len))/log(2.0));
+        uint32_t bucket_bwt_len_power = (uint32_t) floor(log(float(bucket_bwt_len))/log(2.0));
         bucket_bwt_len = 1 << bucket_bwt_len_power;
     }
     else{

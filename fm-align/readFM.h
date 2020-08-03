@@ -19,9 +19,6 @@ struct index32_t {
     uint32_t count[FM_BP_RANGE];
     uint8_t bwt[BWT32_LEN_BYTE];
 
-//#if PAD32_LEN_BYTE != 0
-//    uint8_t pad[PAD32_LEN_BYTE];
-//#endif
 };
 
 
@@ -35,6 +32,19 @@ struct index32_t {
 #endif
 };*/
 
+/**
+    Read the meta data of the index
+
+    @param  *FM_meta_fp         2nd file in the index, contains the ref for backward search
+    @param  *c32                bool to indicate if 32bit is enough to hold the BWT of reference
+    @param  *fmt_len            the length of reconstructed fmt
+    @param  *bucket_bwt_len     the length of BWT in a bucket
+    @param  *wpad               bool to make the length of BWT within a bucket a multiple of 2. 
+                                This requires padding but forgos the use of divider.
+    @param  *bucket_pad_size    The padding size, if wpad == true
+    @param  *end_char_pos       The pos of $ in the BWT.
+    @param  *end_char           Array that contains $X info, only useful for multi-step FM-index
+*/
 
 void read_meta(FILE * FM_meta_fp,
                 bool * c32,
@@ -42,7 +52,8 @@ void read_meta(FILE * FM_meta_fp,
                 uint32_t * bucket_bwt_len,
                 bool * wpad,
                 uint32_t * bucket_pad_size, 
-                uint64_t * endCharPos, uint8_t * endChar);
+                uint64_t * end_char_pos, 
+                uint8_t * end_char);
                 
 uint32_t getOcc(uint8_t sym, uint8_t *bwt, uint32_t s_idx, uint32_t e_idx);
 void revComp(char *dest, char *src, uint8_t len);

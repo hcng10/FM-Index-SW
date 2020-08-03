@@ -33,7 +33,7 @@ void faToFmt(FILE *fasta_fp, FILE * N_fp, char *fmt, uint8_t bit_for_bp, uint64_
 /**
     Use 1 byte (8 bit) to pack 4 nucleotides. With Open_MP, we iterate every
     nucleotide in the reconstructed ref. Then we shift and append the value 
-    within 1 byte until we put 4 nucleotide in there
+    within 1 byte until we put 4 nucleotides in there
 
     @param  *sym    reconstructed ref
     @param  *pck    array to store compressed reconstructed ref

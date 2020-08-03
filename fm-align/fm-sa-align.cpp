@@ -17,10 +17,11 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-
+    
+    // stands for reconfigurable alignment
     string ext = "ral";
 
-    // variables for file
+    // file descriptor for the input files
     FILE *N_fp = NULL;
     FILE *FM_fp = NULL;
     FILE * FM_meta_fp = NULL;
@@ -35,27 +36,33 @@ int main(int argc, char *argv[]) {
     FILE *in_fp = NULL;
     FILE *out_fp = NULL;
 
-    // variables from meta-file
+    // fmt_len is the length of the reference without the N nucleotide
     uint64_t fmt_len;
+
+    // bool to indicate if 32bit is enough to hold the BWT of reference
     bool c32;
+
     uint32_t bucket_bwt_len;
+    uint32_t n_buckets;
+    bool wpad;
     uint32_t bucket_pad_size;
+
+    // Marker for $ pos
     uint64_t end_char_pos[FM_STEP];
     uint8_t end_char[FM_STEP*FM_STEP];
-
 
     uint32_t end_char_bucket;
     uint32_t end_char_bucketi;
 
-    // variables for bwt/ FM-index
-    bool wpad;
-    uint32_t n_buckets;
+    // variables for bwt/FM-index
+    // bitwidth for i(n)
+    uint32_t bitCcnt;
+    // i(n)
+    uint32_t cnt32[FM_I_NUM + 1] = {0};
+    // bucket
     index32_t * idx32;
 
-
-    uint32_t cnt32[FM_I_NUM + 1] = {0};
-    uint32_t bitCcnt;
-
+    // suffix array
     uint32_t * sai;
 
     std::thread align_thread;
@@ -81,8 +88,7 @@ int main(int argc, char *argv[]) {
     string r1 = "result.fq";
 
 
-    printf("loading index ... ");
-    printf("Reading meta data ... ");fflush(stdout);
+    printf("Reading meta data about the index ... ");fflush(stdout);
 
     openFile(&FM_fp, s1, "r");
     openFile(&FM_meta_fp, s2, "r");
@@ -100,20 +106,18 @@ int main(int argc, char *argv[]) {
     end_char_bucketi = (uint32_t) (end_char_pos[0] % bucket_bwt_len);
 #endif
 
-
     n_buckets = CEIL(fmt_len, bucket_bwt_len);
 
-
-
     if (c32){
-        //read the i-table (note it is always stored at 64bit)
+        bitCcnt = 32;
 
+        // read i(n)
         for (int i = 0; i < FM_BP_RANGE + 1; i++){
             uint64_t tmp_cnt;
             readFile(FM_fp, & tmp_cnt, sizeof(uint64_t));
             cnt32[i] = (uint32_t) tmp_cnt;
 
-            cout<<"cnt32 "<<i<<" "<< cnt32[i]<<"\n";
+            //cout<<"cnt32 "<<i<<" "<< cnt32[i]<<"\n";
         }
 
         idx32 = new index32_t [n_buckets];
@@ -121,8 +125,6 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < n_buckets; i++){
             readFile(FM_fp, & idx32[i], FM_BP_RANGE * 4 + BWT32_LEN_BYTE);
         }
-
-        bitCcnt = 32;
 
         for (int c=0;c<4;c++){
             cout<<"The c index"<<(int)c<<" index: "<<(int) idx32[0].count[c]<<"\n";
@@ -133,7 +135,7 @@ int main(int argc, char *argv[]) {
     fclose(FM_fp);
     fclose(FM_meta_fp);
 
-    printf("OK!\n");
+    printf("FINISH ---> Reading meta data!\n");
 
    
     // read SA
@@ -142,7 +144,7 @@ int main(int argc, char *argv[]) {
     openFile(&FM_SA, s7, "r");
     
     sai = new uint32_t[fmt_len];
-    cerr<<fmt_len;
+
     if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
         fprintf(stderr, "error: unable to read SA file!\n");
         exit(1);
@@ -150,7 +152,7 @@ int main(int argc, char *argv[]) {
 
 
     fclose(FM_SA);
-    printf("OK!\n");
+    printf("FINISH ---> Reading SA\n");
 
 
     printf("Reading reads ... \n");fflush(stdout);

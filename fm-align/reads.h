@@ -35,7 +35,15 @@ struct read_t {
     bool is_f_align;
     bool has_N;
 };
+/**
+    Load the short reads for alignment
 
+    @param  *fp         File descriptor for the short reads
+    @param  &reads              vector that contains a batch of short reads
+    @param  *buffer             general buffer used to cache everything
+    @param  *size_r             size that I wants to read
+    @param  *bytes_r            accumulated size read
+*/
 void loadReads(FILE *fp, std::vector<read_t> &reads, char *buffer, uint64_t size_r, bool r_ctrl, uint64_t *bytes);
 uint64_t writeReads(FILE *fp, std::vector<read_t> &reads, char *buffer);
 

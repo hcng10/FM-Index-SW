@@ -11,7 +11,7 @@ void read_meta(FILE * FM_meta_fp,
                 uint32_t * bucket_bwt_len,
                 bool * wpad,
                 uint32_t * bucket_pad_size, 
-                uint64_t * endCharPos, uint8_t * endChar) {
+                uint64_t * end_char_pos, uint8_t * end_char) {
 
     //uint64_t fmt_len = 0;
 
@@ -29,16 +29,16 @@ void read_meta(FILE * FM_meta_fp,
         }
 
         for (uint8_t s = 0; s < FM_STEP; s++){
-            readFile(FM_meta_fp, endCharPos + s, sizeof(uint64_t));
-            cout<<"The val64 "<< (int)endCharPos[s]<<"\n";
+            readFile(FM_meta_fp, end_char_pos + s, sizeof(uint64_t));
+            cout<<"The val64 "<< (int)end_char_pos[s]<<"\n";
         }
 
         for (uint8_t s = 0; s < FM_STEP * FM_STEP; s++){
-            readFile(FM_meta_fp, endChar + s, sizeof(uint8_t));
-            cout<<"The val8 "<< (int)endChar[s]<<"\n";
+            readFile(FM_meta_fp, end_char + s, sizeof(uint8_t));
+            cout<<"The val8 "<< (int)end_char[s]<<"\n";
         }
     }else{
-        readFile(FM_meta_fp, endCharPos, sizeof(uint64_t));
+        readFile(FM_meta_fp, end_char_pos, sizeof(uint64_t));
     }
 
     readFile(FM_meta_fp, fmt_len, sizeof(uint64_t));

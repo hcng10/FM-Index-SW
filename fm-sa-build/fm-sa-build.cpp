@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     // the input refernce fasta file
     FILE * fasta_fp = NULL;
 
-    // temp storage for the format, in char 
+    // temp storage for the reference (ref), in char 
     char * fmt = NULL;
     // convert the nucleotide to 2 bits, pack them
     uint8_t * pck_fmt = NULL;

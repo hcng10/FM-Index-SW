@@ -23,12 +23,6 @@ struct BP_t{
 };
 
 
-// pre-computed intervals
-struct ival_t {
-    uint64_t low;
-    uint64_t high;
-};
-
 
 // index structure
 /*struct index_t {
@@ -60,12 +54,26 @@ public:
 
 };
 
+/**
+    This function converts the reconsturcted ref into compressed FM-index with steps: 
+    (1) Uses divsufsort64 to generate the suffix array (SA). 
+    (2) Generate BWT (char format) using SA by going back to the reconsturcted ref. 
+    (3) Make BWT char represented by uint8_t int. 
+    (4) Record all the $ pos 
+    (5) Set i(n) 
+    (6) Calculate the number of buckets needed and the bwt_length in each bucket 
+    (7) Set the bucket val 
 
+    @param  *FM_fp          fd to write the compressed FM-index
+    @param  *FM_meta_fp     fd for the meta file of the index
+    @param  *SA_ref_fp      fd for storing the SA
+    @param  *fmt            the reconstructed fmt
+    @param  *fmt_len        the length of reconstructed fmt
+    @param  bucket_size     the size of a bucket
+    @param  wpad            bool to make the length of BWT within a bucket a multiple of 2. 
+                            This requires padding but forgos the use of divider.
 
-//uint64_t sumArray(uint64_t *a, int size);
-//uint32_t bitCounting(uint64_t fmt_len);
+*/
 void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint64_t fmt_len, uint32_t bucket_size, bool wpad);
-
-
 
 #endif //FM_SA_H
