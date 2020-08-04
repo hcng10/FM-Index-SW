@@ -58,6 +58,10 @@ To search for a specific pattern 'P' with the FM-index, one character is process
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=top_{new}&space;=&space;c(top_{current},&space;x)&space;&plus;&space;i(x)&space;\\&space;bottom_{new}&space;=&space;c(bottom_{current},&space;x)&space;&plus;&space;i(x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?top_{new}&space;=&space;c(top_{current},&space;x)&space;&plus;&space;i(x)&space;\\&space;bottom_{new}&space;=&space;c(bottom_{current},&space;x)&space;&plus;&space;i(x)" title="top_{new} = c(top_{current}, x) + i(x) \\ bottom_{new} = c(bottom_{current}, x) + i(x)" /></a>
 
+The time complexity of locating a pattern in the reference genome is in linear of the length 'P' instead of 'R'.
+
+The following example demonstrates an example of locating the sequence 'S=CG' in the reference 'R=ACACGT'. 'top_{current}' and 'bottom_{current}' are first initialized to 0 and 7 respectively. Then Equation~\eqref{eq:fm} is applied based on the character in 'S'.
+
 ## References
 <a id="1">[1]</a> 
  P. Ferragina and G. Manzin,
