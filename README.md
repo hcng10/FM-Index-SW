@@ -26,11 +26,11 @@ First, `R` is terminated with a unique character: `$`, which is lexicographicall
 index | SA | Sorted Rotations
 ------| ---| -----------
 0 | 5 |  $GCTAT
-1 | 3 |  AT$GCT
-2 | 1 |  CTAT$G
-3 | 0 |  GCTAT$
-4 | 4 |  T$GCTA
-5 | 2 |  TAT$GC
+1 | 3 |  **AT**$GCT
+2 | 1 |  **CTAT**$G
+3 | 0 |  **GCTAT**$
+4 | 4 |  **T**$GCTA
+5 | 2 |  **TAT**$GC
 
 ## References
 <a id="1">[1]</a> 
