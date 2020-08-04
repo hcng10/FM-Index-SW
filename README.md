@@ -60,7 +60,17 @@ To search for a specific pattern `P` with the FM-index, one character is process
 
 The time complexity of locating a pattern in the reference genome is in linear of the length `P` instead of `R`.
 
-The following example demonstrates an example of locating the sequence `S=CG` in the reference `R=ACACGT`. `top <sub>current </sub>` and `bottom <sub>current </sub>` are first initialized to 0 and 7 respectively. Then equation above is applied based on the character in `S`.
+The following example demonstrates an example of locating the sequence `S=CG` in the reference `R=ACACGT`. top <sub>current</sub> and bottom <sub>current</sub> are first initialized to 0 and 7 respectively. Then equation above is applied based on the character in `S`.
+
+
+After the second iteration, all the characters in S are exhausted and the final top is smaller than the bottom, i.e. `4<5`. Since the suffix array element corresponds to the location of each suffix in the reference `R`, the location of `S` is 3 in the reference when the final `top` and `bottom-1` are mapped onto the suffix array.
+
+### Our Compressed FM-Index
+The alignment process begins with streaming the reads from the host and initializing the pointers `Top` and `Bottom`. These pointers are updated based on the current character and the correlated `i(x)` and `c(n, x)` values from the onboard memory. A command block is responsible for sending memory requests based on the new pointer values.
+
+When the human reference genome is converted into FM-index, the resulting table `c(n, x)` is around \SI{51}{\giga\byte}. This is often far larger than the capacity of onboard memory. To compress the index size so that multiple copies of the index can be associated with multiple kernels, we only store a subset of `c(n, x)`. The remaining entries are substituted with a portion of the original BWT. Intrinsically, we sample every `d` entry of `c(n, x)` and pack the BWT in the range of every `d` and `d-1` alongside, forming a bucket. Normally we set the bucket being a multiple of the burst size to fully utilize the memory bandwidth. During a character search, the missing entries can be recalculated on-the-fly using the ranged BWT. The figure above displays the final compressed index and the required memory storage is significantly reduced to:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mbox{Sampled&space;}&space;c(n,&space;x)&space;\mbox{&space;Size}&space;&plus;&space;\mbox{Sampled&space;}&space;BWT&space;\mbox{&space;Size}\\&space;=&space;\frac{3.2G\times32bit}{d}\times4&plus;3.2G\times2bit\\&space;=&space;(\frac{51.2}{d}&plus;0.8)GB" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mbox{Sampled&space;}&space;c(n,&space;x)&space;\mbox{&space;Size}&space;&plus;&space;\mbox{Sampled&space;}&space;BWT&space;\mbox{&space;Size}\\&space;=&space;\frac{3.2G\times32bit}{d}\times4&plus;3.2G\times2bit\\&space;=&space;(\frac{51.2}{d}&plus;0.8)GB" title="\mbox{Sampled } c(n, x) \mbox{ Size} + \mbox{Sampled } BWT \mbox{ Size}\\ = \frac{3.2G\times32bit}{d}\times4+3.2G\times2bit\\ = (\frac{51.2}{d}+0.8)GB" /></a>
 
 ## References
 <a id="1">[1]</a> 
