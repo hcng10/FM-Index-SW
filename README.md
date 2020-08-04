@@ -60,7 +60,7 @@ To search for a specific pattern 'P' with the FM-index, one character is process
 
 The time complexity of locating a pattern in the reference genome is in linear of the length 'P' instead of 'R'.
 
-The following example demonstrates an example of locating the sequence 'S=CG' in the reference 'R=ACACGT'. 'top_{current}' and 'bottom_{current}' are first initialized to 0 and 7 respectively. Then Equation~\eqref{eq:fm} is applied based on the character in 'S'.
+The following example demonstrates an example of locating the sequence 'S=CG' in the reference 'R=ACACGT'. top_{current} and bottom_{current} are first initialized to 0 and 7 respectively. Then equation above is applied based on the character in 'S'.
 
 ## References
 <a id="1">[1]</a> 
