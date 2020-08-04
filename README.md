@@ -47,7 +47,7 @@ index *n* | A | C | G | T
 
 `i(x)`
 A | C | G | T
-- | - | - | -
+-- | -- | -- | --
 1 | 2 | 4 | 5
 
 ## References
