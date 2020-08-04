@@ -55,9 +55,9 @@ int main(int argc, char *argv[]) {
     uint32_t end_char_bucketi;
 
     // variables for bwt/FM-index
-    // bitwidth for i(n)
+    // bitwidth for i(x)
     uint32_t bitCcnt;
-    // i(n)
+    // i(x)
     uint32_t cnt32[FM_I_NUM + 1] = {0};
     // bucket
     index32_t * idx32;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     if (c32){
         bitCcnt = 32;
 
-        // read i(n)
+        // read i(x)
         for (int i = 0; i < FM_BP_RANGE + 1; i++){
             uint64_t tmp_cnt;
             readFile(FM_fp, & tmp_cnt, sizeof(uint64_t));
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
                                                     idx32, cnt32, 
                                                     bitCcnt, bucket_pad_size, 
                                                     end_char_bucket, end_char_bucketi);
-                                                    
+
                 aligned_cnt2 = aligned_cnt2 + writeReads(out_fp, reads2, out_buff);
 
             }

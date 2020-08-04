@@ -14,7 +14,7 @@
 
     @param  *index              (pointer) index
     @param  *idx                (pointer) the compressed FM-index in consecutive memory space
-    @param  *cnt                (pointer) i(n)
+    @param  *cnt                (pointer) i(x)
     @param  *sym                (pointer) read symbols
     @param  read_len            read length. 
                                 This requires padding but forgos the use of divider.
@@ -135,8 +135,8 @@ void exactSearch(index_t * index,
 
     @param  &reads              vector that contains the short read read_t
     @param  *idx                the compressed FM-index in consecutive memory space
-    @param  *cnt                i(n)
-    @param  bitCcnt             32bit or 64bit for i(n)
+    @param  *cnt                i(x)
+    @param  bitCcnt             32bit or 64bit for i(x)
     @param  *wpad               bool to make the length of BWT within a bucket a multiple of 2. 
                                 This requires padding but forgos the use of divider.
     @param  bucket_pad_size     The padding size, if wpad == true

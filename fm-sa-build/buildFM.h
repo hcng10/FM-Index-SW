@@ -60,7 +60,7 @@ public:
     (2) Generate BWT (char format) using SA by going back to the reconsturcted ref. 
     (3) Make BWT char represented by uint8_t int. 
     (4) Record all the $ pos 
-    (5) Set i(n) 
+    (5) Set i(x) 
     (6) Calculate the number of buckets needed and the bwt_length in each bucket 
     (7) Set the bucket val 
 

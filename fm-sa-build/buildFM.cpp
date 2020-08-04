@@ -132,11 +132,11 @@ inline void bucket_setVal(uint8_t *bwt, uint8_t val, uint32_t bucket_bwt_len, T_
 
 /**
     With a loop boundary of FM_BP_RANGE^STEP_SIZE + 1, it checks which
-    entry of i(n) to increment, by comparing to the permutation: struct BP_t
+    entry of i(x) to increment, by comparing to the permutation: struct BP_t
 
     @param  i       current i when looping across the BWT
     @param  bwt     compressed BWT
-    @param  *bp_prmtn    the precomputed permutation for i(n)
+    @param  *bp_prmtn    the precomputed permutation for i(x)
 */
 inline uint8_t  bwt_prmut_cmp(uint64_t i, BP_t * bwt, BP_t * bp_prmtn){
     uint8_t rtn_val = 0;
@@ -345,16 +345,16 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     }
 
 
-    // compute i(n) 
+    // compute i(x) 
     uint64_t cnt[FM_I_NUM + FM_STEP] = {0};
 
-    // generate all the permutation of i(n) 
+    // generate all the permutation of i(x) 
     BP_t* bp_prmtn = gen_bp_prmut(bwt, end_char_pos);
 
     for (uint64_t i = 0; i < fmt_len; i++) {
         uint8_t val = 0;
 
-        // get the entry number for i(n) that I need to increment
+        // get the entry number for i(x) that I need to increment
         val = bwt_prmut_cmp(i, bwt, bp_prmtn);
         cnt[val]++;
     }
@@ -441,7 +441,7 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
                 // this should prevent the seg fault when accessing
                 bucket_indx_c32[bucket_i].initalize(bwt_length_uint8);
 
-                // assign the value for i(n) within a bucket
+                // assign the value for i(x) within a bucket
                 for (int j = 0; j < FM_I_NUM; j++){
                     bucket_indx_c32[bucket_i].count[j] = cnt_tmp[j] + cnt[j];
                 }
