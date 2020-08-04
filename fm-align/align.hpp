@@ -8,11 +8,35 @@
 #include "readFM.h"
 
 
+
+/**
+    Perform exact match alignment
+
+    @param  *index              (pointer) index
+    @param  *idx                (pointer) the compressed FM-index in consecutive memory space
+    @param  *cnt                (pointer) i(n)
+    @param  *sym                (pointer) read symbols
+    @param  read_len            read length. 
+                                This requires padding but forgos the use of divider.
+    @param  *read_low           (pointer) To store up the final low
+    @param  *read_high          (pointer) To store up the final high
+    @param  bucket_bwt_len      Length of the BWT within a bucket
+    @param  end_char_bucket     bucket index that contains $
+    @param  end_char_bucketi    the offset withing a bucket for $
+    @param  backward            bool for backward search
+
+*/
 template <class index_t, class cnt_t>
-void exactSearch(index_t * index,  cnt_t * cnt, 
-                char *sym, uint8_t read_len, 
-                bool *is_align, uint32_t * read_low, uint32_t * read_high, 
-                uint32_t bucket_bwt_len, uint32_t endCharBucket, uint32_t endCharBucketi,
+void exactSearch(index_t * index,  
+                cnt_t * cnt, 
+                char *sym, 
+                uint8_t read_len, 
+                bool *is_align, 
+                uint32_t * read_low, 
+                uint32_t * read_high, 
+                uint32_t bucket_bwt_len, 
+                uint32_t end_char_bucket, 
+                uint32_t end_char_bucketi,
                 bool backward) {
 
     uint32_t low = 0;
@@ -63,11 +87,12 @@ void exactSearch(index_t * index,  cnt_t * cnt,
         uint32_t low_count = index[low_addr].count[val];
         uint32_t low_bwtcount = getOcc(val, index[low_addr].bwt, 0, low_idx);
 
-        cout<< "lowCCount "<<low_count<<" low_bwtcount "<<low_bwtcount<<" low_idx "<<low_idx<<"\n";
-
+        //DEBUG START   
+        //cout<< "lowCCount "<<low_count<<" low_bwtcount "<<low_bwtcount<<" low_idx "<<low_idx<<"\n";
+        //DEBUG END  
 
         //handle endchar, as it will add 1 for 'A', because in the index $ and A are both represented as 00
-        if (endCharBucket == low_addr &&  endCharBucketi < low_idx && val == 0) {
+        if (end_char_bucket == low_addr &&  end_char_bucketi < low_idx && val == 0) {
             low_bwtcount--;
         }
 
@@ -82,15 +107,15 @@ void exactSearch(index_t * index,  cnt_t * cnt,
         uint32_t high_bwtcount = getOcc(val, index[high_addr].bwt, 0, high_idx);
 
         //handle endchar, as it will add 1 for 'A', because in the index $ and A are both represented as 00
-        if (endCharBucket == high_addr &&  endCharBucketi < high_idx && val == 0) {
+        if (end_char_bucket == high_addr &&  end_char_bucketi < high_idx && val == 0) {
             high_bwtcount--;
         }
 
         high = high_count + high_bwtcount;
 
         //DEBUG START        
-        cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
-        cout<<"symVal: "<<sym[i - 1]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
+        //cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
+        //cout<<"symVal: "<<sym[i - 1]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
         //DEBUG END   
 
         if (low >= high)
@@ -105,38 +130,52 @@ void exactSearch(index_t * index,  cnt_t * cnt,
 
 }
 
+/**
+    Perform exact searching for both backward and reverse complement
 
-
+    @param  &reads              vector that contains the short read read_t
+    @param  *idx                the compressed FM-index in consecutive memory space
+    @param  *cnt                i(n)
+    @param  bitCcnt             32bit or 64bit for i(n)
+    @param  *wpad               bool to make the length of BWT within a bucket a multiple of 2. 
+                                This requires padding but forgos the use of divider.
+    @param  bucket_pad_size     The padding size, if wpad == true
+    @param  end_char_bucket     bucket index that contains $
+    @param  end_char_bucketi    the offset withing a bucket for $
+*/
 template <class index_t, class cnt_t>
-void exactAlign(std::vector<read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t bitCcnt, uint32_t bucket_pad_size,
-                uint32_t endCharBucket, uint32_t endCharBucketi){
+void exactAlign(std::vector<read_t> &reads, 
+                index_t * idx, cnt_t * cnt, 
+                uint32_t bitCcnt, uint32_t bucket_pad_size,
+                uint32_t end_char_bucket, uint32_t end_char_bucketi){
 
     uint32_t bucket_bwt_len = (BUCKET_SIZE * 8 - FM_BP_RANGE * bitCcnt - bucket_pad_size * 8) / FM_BP_BIT ;
 
-    //uint32_t bucket_bwt_len = (BUCKET_SIZE * 8 - FM_BP_RANGE * bitCcnt) / FM_BP_BIT;
-
-    int n_threads = omp_get_max_threads();
 
     if (bitCcnt == 32){
 
-        //#pragma omp parallel for num_threads(n_threads)
+     int n_threads = omp_get_max_threads();    
+#pragma omp parallel for num_threads(n_threads)
         for (uint32_t i = 0; i < reads.size(); i++) {
 
             // only peform exact match when there is no N char
             if (reads[i].has_N == false) {
                 // exact align read
-                cout<<"\nBackward: "<<"\n";
+                //DEBUG START   
+                //cout<<"\nBackward: "<<"\n";
+                //DEBUG END
                 exactSearch<index32_t, uint32_t>(idx, cnt, 
                                                 reads[i].seq, reads[i].seq_len, 
                                                 &reads[i].is_b_align, &reads[i].b_low, &reads[i].b_high, 
-                                                bucket_bwt_len, endCharBucket, endCharBucketi,
+                                                bucket_bwt_len, end_char_bucket, end_char_bucketi,
                                                 true);
-
-                cout<<"\nForward : Reverse Complement "<<"\n";
+                //DEBUG START 
+                //cout<<"\nForward : Reverse Complement "<<"\n";
+                //DEBUG END
                 exactSearch<index32_t, uint32_t>(idx, cnt, 
                                                 reads[i].seq, reads[i].seq_len, 
                                                 &reads[i].is_f_align, &reads[i].f_low, &reads[i].f_high, 
-                                                bucket_bwt_len, endCharBucket, endCharBucketi,
+                                                bucket_bwt_len, end_char_bucket, end_char_bucketi,
                                                 false);
 
             }
@@ -148,9 +187,5 @@ void exactAlign(std::vector<read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t
 
 
 }
-
-
-
-
 
 #endif

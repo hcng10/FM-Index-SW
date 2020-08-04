@@ -6,7 +6,7 @@
 #include <iostream>
 #include <thread>
 #include <bitset>
-
+#include <omp.h>
 
 #include "file_op.h"
 #include "readFM.h"
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     string r1 = "result.fq";
 
 
-    printf("Reading meta data about the index ... ");fflush(stdout);
+    printf("Reading meta data about the index ... \n");fflush(stdout);
 
     openFile(&FM_fp, s1, "r");
     openFile(&FM_meta_fp, s2, "r");
@@ -126,16 +126,12 @@ int main(int argc, char *argv[]) {
             readFile(FM_fp, & idx32[i], FM_BP_RANGE * 4 + BWT32_LEN_BYTE);
         }
 
-        for (int c=0;c<4;c++){
-            cout<<"The c index"<<(int)c<<" index: "<<(int) idx32[0].count[c]<<"\n";
-        }
-
     }
 
     fclose(FM_fp);
     fclose(FM_meta_fp);
 
-    printf("FINISH ---> Reading meta data!\n");
+    printf("FINISH ---> Reading meta data!\n\n");
 
    
     // read SA
@@ -152,7 +148,7 @@ int main(int argc, char *argv[]) {
 
 
     fclose(FM_SA);
-    printf("FINISH ---> Reading SA\n");
+    printf("FINISH ---> Reading SA\n\n");
 
 
     printf("Reading reads ... \n");fflush(stdout);
@@ -174,15 +170,21 @@ int main(int argc, char *argv[]) {
 
     loadReads(in_fp, reads1, in_buff, size_r, true, &bytes_r);
 
-
-
+    // print the first 5 reads
     for (uint32_t i = 0; i < 5; i++) {
         printf("%u: %s\n", i, reads1[i].seq);
     }
 
+    printf("FINISH ---> Reading reads\n\n");fflush(stdout);
+
+    // some debugging variables
     uint64_t aligned_cnt1 = 0;
     uint64_t aligned_cnt2 = 0;
     uint32_t cnt = 0;
+
+    printf("Aligning reads ... \n ");
+
+    // ping-pong processing
     for (int i = 0; ; i++) {
 
         bool r_ctrl = bytes_r < f_size ? true : false;
@@ -195,7 +197,11 @@ int main(int argc, char *argv[]) {
             if (reads1.size() > 0) {
                 cnt += reads1.size();
 
-                exactAlign <index32_t, uint32_t > (reads1, idx32, cnt32, bitCcnt, bucket_pad_size, end_char_bucket, end_char_bucketi);
+                exactAlign <index32_t, uint32_t > (reads1, 
+                                                    idx32, cnt32, 
+                                                    bitCcnt, bucket_pad_size, 
+                                                    end_char_bucket, end_char_bucketi);
+
                 aligned_cnt1 = aligned_cnt1 + writeReads(out_fp, reads1, out_buff);
 
             }
@@ -207,7 +213,11 @@ int main(int argc, char *argv[]) {
             if (reads2.size() > 0) {
                 cnt += reads2.size();
 
-                exactAlign <index32_t, uint32_t > (reads2, idx32, cnt32, bitCcnt, bucket_pad_size, end_char_bucket, end_char_bucketi);
+                exactAlign <index32_t, uint32_t > (reads2, 
+                                                    idx32, cnt32, 
+                                                    bitCcnt, bucket_pad_size, 
+                                                    end_char_bucket, end_char_bucketi);
+                                                    
                 aligned_cnt2 = aligned_cnt2 + writeReads(out_fp, reads2, out_buff);
 
             }
@@ -223,6 +233,8 @@ int main(int argc, char *argv[]) {
     }
 
     align_thread.join();
+
+    printf("FINISH ---> Alignment\n\n");
 
     delete [] idx32;
     delete [] in_buff;

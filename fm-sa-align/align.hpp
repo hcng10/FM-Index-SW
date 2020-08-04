@@ -6,10 +6,11 @@
 
 #include "reads.h"
 #include "readFM.h"
+#include "simpleSmithWaterman.hpp"
 
 
-template <class index_t, class cnt_t>
-void exactSearch(index_t * index,  cnt_t * cnt, 
+template <class index_t, class FMBit_t>
+void exactSearch(index_t * index,  FMBit_t * cnt, 
                 Read_t & read,
                 uint32_t bucket_bwt_len, uint32_t endCharBucket, uint32_t endCharBucketi,
                 bool backward) {
@@ -66,14 +67,11 @@ void exactSearch(index_t * index,  cnt_t * cnt,
             uint32_t low_count = index[low_addr].count[val];
             uint32_t low_bwtcount = getOcc(val, index[low_addr].bwt, 0, low_idx);
 
-            cout<< "lowCCount "<<low_count<<" low_bwtcount "<<low_bwtcount<<" low_idx "<<low_idx<<"\n";
-
-
             //handle endchar, as it will add 1 for 'A', because in the index $ and A are both represented as 00
             if (endCharBucket == low_addr &&  endCharBucketi < low_idx && val == 0) {
                 low_bwtcount--;
             }
-
+            cout<< "lowCCount "<<low_count<<" low_bwtcount "<<low_bwtcount<<" low_idx "<<low_idx<<" low_addr "<<low_addr<<"\n";
 
             low = low_count + low_bwtcount;
 
@@ -89,9 +87,9 @@ void exactSearch(index_t * index,  cnt_t * cnt,
             }
 
             high = high_count + high_bwtcount;
-                    cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<"\n\n";
+                    cout<< "highCCount "<<high_count<<" high_bwtcount "<<high_bwtcount<<" high_idx "<<high_idx<<" high_addr "<<high_addr<<"\n";
                                                                             
-            cout<<(int)sym_idx<<"symVal: "<<sym[sym_idx]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
+            cout<<(int)sym_idx<<"symVal:::: "<<sym[sym_idx]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n\n";
 
             sym_idx = backward == 1? sym_idx - 1: sym_idx + 1;
 
@@ -117,10 +115,34 @@ void exactSearch(index_t * index,  cnt_t * cnt,
 
 }
 
+template <class FMBit_t>
+void SAtoPos(Read_t read, FMBit_t * sai){
+
+    for (uint16_t i = 0; i < read.seed_aligned_cnt; i++){
+        uint16_t entry = read.seed_rank[i];
+        cout<<"current entry>>>>>>>>>>>>>>>>>>>>>> "<<entry;
+
+        uint64_t aligned_num = read.sub_reads[entry].high - read.sub_reads[entry].low;
+        read.sub_reads[entry].SA_list = new uint32_t[aligned_num];
+
+        uint64_t offset = read.sub_reads[entry].low;
+        for (uint64_t j = 0; j < aligned_num; j++){
+             read.sub_reads[entry].SA_list[j] = sai[offset];
+             offset++;
+             cout<<" "<<read.sub_reads[entry].SA_list[j];
+
+        }
+        cout<<"\n";
+    }
+}
 
 
-template <class index_t, class cnt_t>
-void exactAlign(std::vector<Read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t bitCcnt, uint32_t bucket_pad_size,
+
+template <class index_t, class FMBit_t>
+void exactAlign(std::vector<Read_t> &reads, 
+                index_t * idx, FMBit_t * cnt, FMBit_t* sai,
+                uint32_t bitCcnt, 
+                uint32_t bucket_pad_size,
                 uint32_t endCharBucket, uint32_t endCharBucketi){
 
     uint32_t bucket_bwt_len = (BUCKET_SIZE * 8 - FM_BP_RANGE * bitCcnt - bucket_pad_size * 8) / FM_BP_BIT ;
@@ -148,6 +170,12 @@ void exactAlign(std::vector<Read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t
                                                 reads[i],
                                                 bucket_bwt_len, endCharBucket, endCharBucketi,
                                                 false);
+
+                //obtain original positions
+                SAtoPos<uint32_t>(reads[i], sai);
+                //seed-and-extend
+
+
                 reads[i].callDestructor = true;
 
             }

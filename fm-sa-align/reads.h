@@ -19,17 +19,24 @@ struct sub_read_t{
 
     bool is_b_align;
     bool is_f_align;
+
+    uint32_t * SA_list;
+
+    ~sub_read_t(){
+        delete [] SA_list;
+    }
     
 };
 
 class Read_t {
     private:
         uint16_t sub_read_cnt;
-        sub_read_t * sub_reads;
-        uint16_t * seed_rank;
-        uint16_t seed_aligned_cnt;
 
     public:
+        uint16_t seed_aligned_cnt;
+        sub_read_t * sub_reads;
+        uint16_t * seed_rank;
+
         // trick the destructor
         bool callDestructor;
 
@@ -81,21 +88,15 @@ class Read_t {
             uint16_t entry_num = backward ? cur_entry_cnt: (this->sub_read_cnt /2) + cur_entry_cnt;
             
             sub_reads[entry_num].start_pos = start_pos;
+            sub_reads[entry_num].low = low;
+            sub_reads[entry_num].high = high;
+
             if (backward == 1){
-                sub_reads[entry_num].low = low;
-                sub_reads[entry_num].high = high;
                 sub_reads[entry_num].is_b_align = true;
-
-                sub_reads[entry_num].start_pos = start_pos;
-
                 //cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>writing: "<<(int) entry_num <<" start_pos "<<start_pos<<" low "<<low<<" high "<<high<<"\n\n";
             }
             else{
-                sub_reads[entry_num].low = low;
-                sub_reads[entry_num].high = high;
                 sub_reads[entry_num].is_f_align = true;
-
-                sub_reads[entry_num].start_pos = start_pos;
             }
 
             if (seed_aligned_cnt == 0){
@@ -123,14 +124,18 @@ class Read_t {
 
                 if (start_sft == false){
                     seed_rank[seed_aligned_cnt] = entry_num;
+                }else{
+                    seed_rank[seed_aligned_cnt] = chk_seed_num;
                 }
             }
 
             seed_aligned_cnt++;
 
+            cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> The current round>>";
             for (int k = 0; k< sub_read_cnt; k++){
                 cout<<seed_rank[k]<<" ";
             }
+            cout<<"\n";
         }
 
         // we don't use destructor here because we didn't do deep copy

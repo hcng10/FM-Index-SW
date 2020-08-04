@@ -21,16 +21,16 @@ int main(int argc, char *argv[]) {
     string ext = "ral";
 
     // variables for file
-    FILE *N_fp = NULL;
-    FILE *FM_fp = NULL;
+    FILE * N_fp = NULL;
+    FILE * FM_fp = NULL;
     FILE * FM_meta_fp = NULL;
 
-    FILE *rev_N_fp = NULL;
-    FILE *rev_FM_fp = NULL;
+    FILE * rev_N_fp = NULL;
+    FILE * rev_FM_fp = NULL;
     FILE * rev_FM_meta_fp = NULL;
 
-    FILE * FM_SA = NULL;
-    FILE * rev_FM_SA = NULL;
+    FILE * SA_fp = NULL;
+    FILE * rev_SA_fp = NULL;
 
     FILE *in_fp = NULL;
     FILE *out_fp = NULL;
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     uint32_t cnt32[FM_I_NUM + 1] = {0};
     uint32_t bitCcnt;
 
-    uint32_t * sai;
+    uint32_t * sai32;
 
     std::thread align_thread;
 
@@ -149,20 +149,17 @@ int main(int argc, char *argv[]) {
     // read SA
     printf("Reading SA ... \n");fflush(stdout);
 
-    openFile(&FM_SA, s7, "r");
+    openFile(&SA_fp, s7, "r");
     
-    sai = new uint32_t[fmt_len];
+    sai32 = new uint32_t[fmt_len];
+
     cerr<<fmt_len;
-    if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
+    if (fread(sai32, sizeof(uint32_t), fmt_len, SA_fp) != fmt_len) {
         fprintf(stderr, "error: unable to read SA file!\n");
         exit(1);
     }
 
-    /*for (int i= 0; i<fmt_len; i++){
-        cout<<"SA "<<sai[i]<<"\n";
-    }*/
-
-    fclose(FM_SA);
+    fclose(SA_fp);
     printf("OK!\n");
 
 
@@ -206,7 +203,11 @@ int main(int argc, char *argv[]) {
             if (reads1.size() > 0) {
                 cnt += reads1.size();
 
-                exactAlign <index32_t, uint32_t > (reads1, idx32, cnt32, bitCcnt, bucket_pad_size, end_char_bucket, end_char_bucketi);
+                exactAlign <index32_t, uint32_t > (reads1, 
+                                                    idx32, cnt32, sai32,
+                                                    bitCcnt, 
+                                                    bucket_pad_size, 
+                                                    end_char_bucket, end_char_bucketi);
                 aligned_cnt1 = aligned_cnt1 + writeReads(out_fp, reads1, out_buff);
                 
 
@@ -219,7 +220,11 @@ int main(int argc, char *argv[]) {
             if (reads2.size() > 0) {
                 cnt += reads2.size();
 
-                exactAlign <index32_t, uint32_t > (reads2, idx32, cnt32, bitCcnt, bucket_pad_size, end_char_bucket, end_char_bucketi);
+                exactAlign <index32_t, uint32_t > (reads2, 
+                                                    idx32, cnt32, sai32,
+                                                    bitCcnt, 
+                                                    bucket_pad_size, 
+                                                    end_char_bucket, end_char_bucketi);
                 aligned_cnt2 = aligned_cnt2 + writeReads(out_fp, reads2, out_buff);
 
             }
@@ -239,7 +244,7 @@ int main(int argc, char *argv[]) {
     delete [] idx32;
     delete [] in_buff;
     delete [] out_buff;
-    delete [] sai;
+    delete [] sai32;
 
     fclose(in_fp);
     fclose(out_fp);

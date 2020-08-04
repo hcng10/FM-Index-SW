@@ -30,10 +30,3 @@
 #define CEIL(a, b) (((a)+(b)-1)/(b))
 
 #endif //FM_SA_H
-
-//uint32_t bucket_bwt_offset = (i % (bucket_bwt_len)) / (8/bit_for_bp);//this will over count
-//uint32_t bucket_bwt_sft = i % (8 / bit_for_bp);
-
-//TODO: The end char $ sign is not considered
-//uint8_t val_sft = val << (bucket_bwt_sft * bit_for_bp);//lsb, bwt in smaller position
-//bwt[bucket_bwt_offset] |= val_sft;

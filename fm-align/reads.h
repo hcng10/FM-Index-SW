@@ -40,18 +40,12 @@ struct read_t {
 
     @param  *fp         File descriptor for the short reads
     @param  &reads              vector that contains a batch of short reads
-    @param  *buffer             general buffer used to cache everything
-    @param  *size_r             size that I wants to read
-    @param  *bytes_r            accumulated size read
+    @param  *buffer             (pointer) general buffer used to cache everything
+    @param  *size_r             (pointer) size that I wants to read
+    @param  *bytes_r            (pointer) accumulated size read
 */
 void loadReads(FILE *fp, std::vector<read_t> &reads, char *buffer, uint64_t size_r, bool r_ctrl, uint64_t *bytes);
 uint64_t writeReads(FILE *fp, std::vector<read_t> &reads, char *buffer);
-
-
-//template <class index_t, class cnt_t>
-//void exactAlign(std::vector<read_t> &reads, index_t * idx, cnt_t * cnt, uint32_t bitCcnt);
-
-
 
 
 #endif //FM_SA_ALIGN_READS_H

@@ -22,30 +22,19 @@ struct index32_t {
 };
 
 
-
-/*struct index64_t {
-    uint64_t count[FM_BP_RANGE];
-    uint8_t bwt[BWT64_LEN_BYTE];
-
-#if PAD64_LEN_BYTE != 0
-    uint8_t pad[PAD64_LEN_BYTE];
-#endif
-};*/
-
 /**
     Read the meta data of the index
 
     @param  *FM_meta_fp         2nd file in the index, contains the ref for backward search
-    @param  *c32                bool to indicate if 32bit is enough to hold the BWT of reference
-    @param  *fmt_len            the length of reconstructed fmt
-    @param  *bucket_bwt_len     the length of BWT in a bucket
-    @param  *wpad               bool to make the length of BWT within a bucket a multiple of 2. 
+    @param  *c32                (pointer) bool to indicate if 32bit is enough to hold the BWT of reference
+    @param  *fmt_len            (pointer) the length of reconstructed fmt
+    @param  *bucket_bwt_len     (pointer) the length of BWT in a bucket
+    @param  *wpad               (pointer) bool to make the length of BWT within a bucket a multiple of 2. 
                                 This requires padding but forgos the use of divider.
-    @param  *bucket_pad_size    The padding size, if wpad == true
-    @param  *end_char_pos       The pos of $ in the BWT.
-    @param  *end_char           Array that contains $X info, only useful for multi-step FM-index
+    @param  *bucket_pad_size    (pointer) The padding size, if wpad == true
+    @param  *end_char_pos       (pointer) The pos of $ in the BWT.
+    @param  *end_char           (pointer) Array that contains $X info, only useful for multi-step FM-index
 */
-
 void read_meta(FILE * FM_meta_fp,
                 bool * c32,
                 uint64_t * fmt_len, 
@@ -59,3 +48,14 @@ uint32_t getOcc(uint8_t sym, uint8_t *bwt, uint32_t s_idx, uint32_t e_idx);
 void revComp(char *dest, char *src, uint8_t len);
 
 #endif //FM_SA_ALIGN_READFM_H
+
+
+
+/*struct index64_t {
+    uint64_t count[FM_BP_RANGE];
+    uint8_t bwt[BWT64_LEN_BYTE];
+
+#if PAD64_LEN_BYTE != 0
+    uint8_t pad[PAD64_LEN_BYTE];
+#endif
+};*/

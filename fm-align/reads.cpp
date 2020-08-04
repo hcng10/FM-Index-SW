@@ -136,8 +136,8 @@ void loadReads(FILE *fp, std::vector<read_t> &reads, char *buffer, uint64_t size
         }
     }
     gettimeofday(&tv2, NULL);
-    printf("OK Load Reads Time [%.2f s]\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-                                            (double) (tv2.tv_sec - tv1.tv_sec));
+    //printf("OK Load Reads Time [%.2f s]\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+                                            //(double) (tv2.tv_sec - tv1.tv_sec));
 }
 
 
@@ -149,7 +149,7 @@ uint64_t writeReads(FILE *fp, std::vector<read_t> &reads, char *buffer)
 
     // write hits to buffer
     for (uint32_t i = 0; i < reads.size(); i++) {
-        if (reads[i].is_b_align == false || reads[i].is_f_align == false ) {
+        if (reads[i].is_b_align == false && reads[i].is_f_align == false ) {
 
             // write buffer before overflow
             if ((bytes + 512) > BUFF_SIZE) {
