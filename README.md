@@ -52,6 +52,12 @@ A | C | G | T
 -- | -- | -- | --
 1 | 3 | 5 | 6
 
+Alignment of reads with FM-index operates on the functions 'i(x)' and 'c(n, x)' recursively. Two pointers 'top' and 'bottom' are defined to perform the search. 'top' refers to an index of the suffix array element where a specific pattern is first located, and 'bottom' is the location where the pattern can be last found. If 'bottom' points to an index that is less than or equal to the index pointed by the 'top', the pattern does not occur on the text.
+
+To search for a specific pattern 'P' with the FM-index, one character is processed at a time, starting with the last character of 'P'. The 'top' and 'bottom' are first initialized with the first and last indices of the 'c(n, x)' function respectively. Then both pointers are updated according to the following equations:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=top_{new}&space;=&space;c(top_{current},&space;x)&space;&plus;&space;i(x)&space;\\&space;bottom_{new}&space;=&space;c(bottom_{current},&space;x)&space;&plus;&space;i(x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?top_{new}&space;=&space;c(top_{current},&space;x)&space;&plus;&space;i(x)&space;\\&space;bottom_{new}&space;=&space;c(bottom_{current},&space;x)&space;&plus;&space;i(x)" title="top_{new} = c(top_{current}, x) + i(x) \\ bottom_{new} = c(bottom_{current}, x) + i(x)" /></a>
+
 ## References
 <a id="1">[1]</a> 
  P. Ferragina and G. Manzin,
