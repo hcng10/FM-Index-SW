@@ -23,7 +23,7 @@
 #endif 
 
 #define MAX_READ_LEN 2000
-#define BUFF_SIZE 80000000
+#define BUFF_SIZE 800000000
 //800000000
 
 // round up division

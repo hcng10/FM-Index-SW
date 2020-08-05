@@ -135,20 +135,20 @@ int main(int argc, char *argv[]) {
 
    
     // read SA
-    printf("Reading SA ... \n");fflush(stdout);
+    //printf("Reading SA ... \n");fflush(stdout);
 
-    openFile(&FM_SA, s7, "r");
+    //openFile(&FM_SA, s7, "r");
     
-    sai = new uint32_t[fmt_len];
+    //sai = new uint32_t[fmt_len];
 
-    if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
-        fprintf(stderr, "error: unable to read SA file!\n");
-        exit(1);
-    }
+    //if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
+        //fprintf(stderr, "error: unable to read SA file!\n");
+        //exit(1);
+   //}
 
 
-    fclose(FM_SA);
-    printf("FINISH ---> Reading SA\n\n");
+    //fclose(FM_SA);
+    //printf("FINISH ---> Reading SA\n\n");
 
 
     printf("Reading reads ... \n");fflush(stdout);
@@ -227,19 +227,19 @@ int main(int argc, char *argv[]) {
         }
 
         align_thread.join();
-        printf("processed %u reads\n", cnt);
-        printf("aligned %lu reads\n", aligned_cnt1 + aligned_cnt2);
 
     }
 
     align_thread.join();
 
     printf("FINISH ---> Alignment\n\n");
+    printf("processed %u reads\n", cnt);
+    printf("aligned %lu reads\n", aligned_cnt1 + aligned_cnt2);
 
     delete [] idx32;
     delete [] in_buff;
     delete [] out_buff;
-    delete [] sai;
+    //delete [] sai;
 
     fclose(in_fp);
     fclose(out_fp);
