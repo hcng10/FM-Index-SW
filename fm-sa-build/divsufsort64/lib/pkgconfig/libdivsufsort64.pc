@@ -1,0 +1,11 @@
+prefix=/home/hcng/ICL/uncertain_project/hcng_mk1/bowtie2-lite/divsufsort64
+exec_prefix=${prefix}
+libdir=/home/hcng/ICL/uncertain_project/hcng_mk1/bowtie2-lite/divsufsort64/lib
+includedir=/home/hcng/ICL/uncertain_project/hcng_mk1/bowtie2-lite/divsufsort64/include
+
+Name: libdivsufsort64
+Description: A lightweight suffix sorting library
+Version: 2.0.2-1
+URL: https://github.com/y-256/libdivsufsort
+Libs: -L${libdir} -ldivsufsort64
+Cflags: -I${includedir}
