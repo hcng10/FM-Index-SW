@@ -1,7 +1,7 @@
 XCC=g++
 
-HEADERS = ../fm-sa-def.h file_op.h readFM.h reads.h
-HEADER_CPPS = file_op.cpp readFM.cpp reads.cpp align.hpp
+HEADERS = ../fm-sa-def.h file_op.h readFM.h reads.h writeSAM.h
+HEADER_CPPS = file_op.cpp readFM.cpp reads.cpp align.hpp writeSAM.cpp
 
 
 FM_SA_LIST = fm-sa-align

@@ -75,7 +75,7 @@ void exactSearch(index_t * index,
                 default : val = 0;
             }           
         }
-
+        
         //#TODO: Not sure if this is correct
         //uint32_t low_tmp = low == 0 ? 0 : low - 1;
         bool same_bucket = high - low < bucket_bwt_len ? true : false;
@@ -118,11 +118,11 @@ void exactSearch(index_t * index,
         //cout<<"symVal: "<<sym[i - 1]<<" lowNew: "<<(long) low<<" highNew: "<<(long)high<<"\n";
         //DEBUG END   
 
-        if (low >= high)
+        if (low >= high){
             return;
+        }
 
     }
-
     // store hit
     *is_align = true;
     * read_low = low;
@@ -155,7 +155,7 @@ void exactAlign(std::vector<read_t> &reads,
     if (bitCcnt == 32){
 
      int n_threads = omp_get_max_threads();    
-#pragma omp parallel for num_threads(n_threads)
+//#pragma omp parallel for num_threads(n_threads)
         for (uint32_t i = 0; i < reads.size(); i++) {
 
             // only peform exact match when there is no N char

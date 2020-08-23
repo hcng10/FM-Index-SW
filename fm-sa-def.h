@@ -29,4 +29,6 @@
 // round up division
 #define CEIL(a, b) (((a)+(b)-1)/(b))
 
+#define ALIGN_REPORT_NUM 16
+
 #endif //FM_SA_H

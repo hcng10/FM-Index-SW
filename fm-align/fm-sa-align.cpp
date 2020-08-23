@@ -12,6 +12,7 @@
 #include "readFM.h"
 #include "reads.h"
 #include "align.hpp"
+#include "writeSAM.h"
 
 
 using namespace std;
@@ -35,6 +36,7 @@ int main(int argc, char *argv[]) {
 
     FILE *in_fp = NULL;
     FILE *out_fp = NULL;
+    FILE *sam_fp = NULL;
 
     // fmt_len is the length of the reference without the N nucleotide
     uint64_t fmt_len;
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
     string s8 = string(argv[1]) + ".8." + ext;
 
     string r1 = "result.fq";
+    string rs1 = "aligned.sam";
 
 
     printf("Reading meta data about the index ... \n");fflush(stdout);
@@ -135,32 +138,33 @@ int main(int argc, char *argv[]) {
 
    
     // read SA
-    //printf("Reading SA ... \n");fflush(stdout);
+    printf("Reading SA ... \n");fflush(stdout);
 
-    //openFile(&FM_SA, s7, "r");
+    openFile(&FM_SA, s7, "r");
     
-    //sai = new uint32_t[fmt_len];
+    sai = new uint32_t[fmt_len];
 
-    //if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
-        //fprintf(stderr, "error: unable to read SA file!\n");
-        //exit(1);
-   //}
+    if (fread(sai, sizeof(uint32_t), fmt_len, FM_SA) != fmt_len) {
+        fprintf(stderr, "error: unable to read SA file!\n");
+        exit(1);
+    }
 
 
-    //fclose(FM_SA);
-    //printf("FINISH ---> Reading SA\n\n");
-
+    fclose(FM_SA);
+    printf("FINISH ---> Reading SA\n\n");
 
     printf("Reading reads ... \n");fflush(stdout);
 
     // allocate I/O buffers
     char * in_buff = new char [BUFF_SIZE + 512];
     char * out_buff = new char [BUFF_SIZE];
+    char * sam_buff = new char [BUFF_SIZE];
 
     std::vector<read_t> reads1, reads2;
 
 
     openFile(&out_fp, r1, "w+");
+    openFile(&sam_fp, rs1, "w+");
     // read first batch
     openFile(&in_fp, argv[2], "r");
     f_size = fileSizeBytes(in_fp);
@@ -202,6 +206,8 @@ int main(int argc, char *argv[]) {
                                                     bitCcnt, bucket_pad_size, 
                                                     end_char_bucket, end_char_bucketi);
 
+                convertSAM(sam_fp, reads1, sai, sam_buff);
+
                 aligned_cnt1 = aligned_cnt1 + writeReads(out_fp, reads1, out_buff);
 
             }
@@ -239,9 +245,11 @@ int main(int argc, char *argv[]) {
     delete [] idx32;
     delete [] in_buff;
     delete [] out_buff;
+    delete [] sam_buff;
     //delete [] sai;
 
     fclose(in_fp);
     fclose(out_fp);
+    fclose(sam_fp);
 
 }
