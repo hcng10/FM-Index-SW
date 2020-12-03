@@ -13,6 +13,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <bitset>
+#include <vector>
+
 
 using namespace std;
 
@@ -41,8 +43,9 @@ void writeFile(FILE *fp, void *data, uint64_t n_bytes);
     @param  ref_cnt     the starting point of N nucleotide in original reference
     @param  fmt_cnt     the point where N nucleotide got cut off in the reconstructed ref
     @param  un_cnt      number of N nucleotide in this cluster
+    @param  cum_un_cnt  cumulative number of N char up to this point 
 
 */
-void writeNinfo(FILE *fp, u_int64_t ref_cnt, u_int64_t fmt_cnt, u_int32_t un_cnt);
+void writeNinfo(FILE * fp, uint64_t ref_cnt, uint64_t fmt_cnt, uint32_t un_cnt, uint64_t cum_un_cnt);
 
 #endif //FM_SA_H

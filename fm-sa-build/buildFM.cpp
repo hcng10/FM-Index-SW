@@ -43,7 +43,9 @@ void write_meta(FILE * FM_meta_fp,
                 bool wpad,
                 uint32_t pad_size, 
                 uint64_t* end_char_pos,
-                uint8_t * endChar ){
+                uint8_t * endChar,
+                uint64_t N_cluster,
+                uint16_t chrs_num){
 
     if (FM_STEP > 1){
         uint8_t fm_step = FM_STEP;
@@ -76,10 +78,81 @@ void write_meta(FILE * FM_meta_fp,
 
     writeFile(FM_meta_fp, &bucket_bwt_len, sizeof(uint32_t));
 
+    writeFile(FM_meta_fp, &N_cluster, sizeof(uint64_t));
+    writeFile(FM_meta_fp, &chrs_num, sizeof(uint16_t));
 
     writeFile(FM_meta_fp, &pad_size, sizeof(uint32_t));
     writeFile(FM_meta_fp, &wpad, sizeof(bool));
+}
 
+
+/**
+    Inline functions that determine the number of N chars before the current index in the reference,
+    which is indicated with sa_val.
+
+    @param  sa_val              current index in the reference
+    @param  nchar_clusters      vector that contains all the info about N char
+
+*/
+inline uint64_t findNCharNum(uint64_t sa_val, std::vector<nchar_cluster_t> &nchar_clusters){
+
+    // No N char
+    if (nchar_clusters.size() == 0) return sa_val;
+
+    // Only one cluster of N char
+    if (nchar_clusters.size() == 1){
+        if (sa_val >= nchar_clusters[0].fmt_cnt){
+            return nchar_clusters[0].cum_un_cnt + sa_val;
+        }
+        else{
+            return sa_val;
+        }
+    }
+
+    uint32_t start = 0;
+    uint32_t end = nchar_clusters.size()-1;
+    uint32_t mid = end / 2;
+
+    uint32_t sel = 0;
+
+    // Target index bigger or smaller than the indices of the N char cluster
+    if (sa_val < nchar_clusters[0].fmt_cnt) return sa_val;
+    if (sa_val > nchar_clusters[end].fmt_cnt) return nchar_clusters[end].cum_un_cnt + sa_val;
+
+    while (start <= end){
+        
+        if (start == end){
+            if (sa_val >= nchar_clusters[end].fmt_cnt){
+                return nchar_clusters[end].cum_un_cnt + sa_val;
+            }
+            else{
+                return nchar_clusters[sel].cum_un_cnt + sa_val;
+            }
+        }
+
+        if (sa_val > nchar_clusters[mid].fmt_cnt){
+            sel = mid;
+
+            start = mid + 1;
+            end = end;
+            mid = (end - start) / 2 + start; 
+        }
+        else if (sa_val < nchar_clusters[mid].fmt_cnt){
+            start = start;
+            end = (mid == 0)? mid: mid - 1;
+            mid = (end - start) / 2 + start; 
+
+            sel = end;
+        }
+        else if (sa_val == nchar_clusters[mid].fmt_cnt){
+            return nchar_clusters[mid].cum_un_cnt + sa_val;
+        }
+    }
+
+    /*if (sa_val == nchar_clusters[mid].fmt_cnt)
+        return nchar_clusters[mid].cum_un_cnt + sa_val;
+    else
+        return nchar_clusters[sel].cum_un_cnt + sa_val;*/
 }
 
 
@@ -212,7 +285,17 @@ inline BP_t * gen_bp_prmut(BP_t* bwt, uint64_t* end_char_pos){
     return bp_prmtn;
 }
 
-void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint64_t fmt_len, uint32_t bucket_size, bool wpad){
+void fmtToIdx(FILE *FM_fp, 
+                FILE * FM_meta_fp, 
+                FILE * SA_ref_fp, 
+                uint16_t chrs_num,
+                char *fmt, 
+                uint64_t fmt_len,  
+                std::vector<nchar_cluster_t> &nchar_clusters, //TODO: uint64_t N_cluster, 
+                uint32_t bucket_size, 
+                bool wpad,
+                uint64_t ref_len,
+                bool is_rev){
 
     int n_threads = omp_get_max_threads();
 
@@ -257,8 +340,12 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     divsufsort64((uint8_t*)fmt, sai, (int64_t)fmt_len);
 
     // write SA/ref to a file
-    for (int i = 0; i< fmt_len; i++){
-        uint32_t sa_val = (uint32_t )sai[i];
+    for (uint64_t i = 0; i< fmt_len; i++){
+        uint32_t sa_val = (uint32_t ) findNCharNum(sai[i], nchar_clusters);
+        //uint32_t sa_val = (uint32_t )sai[i];
+        if (is_rev == true){
+            sa_val = ref_len - sa_val - 1;
+        }
         writeFile(SA_ref_fp, &sa_val, sizeof(uint32_t));
     }
 
@@ -482,11 +569,16 @@ void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint6
     }
 
     write_meta(FM_meta_fp, 
-                c32, fmt_len, 
-                bwt, bucket_bwt_len, 
-                wpad, pad_size, 
+                c32, 
+                fmt_len, 
+                bwt, 
+                bucket_bwt_len, 
+                wpad, 
+                pad_size, 
                 end_char_pos,
-                endChar);
+                endChar,
+                (uint64_t) nchar_clusters.size(),
+                chrs_num);
 
     delete [] bp_prmtn;
     delete [] bwtM;

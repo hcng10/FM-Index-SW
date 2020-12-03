@@ -16,6 +16,7 @@
 #include "divsufsort64/include/divsufsort64.h"
 #include "../fm-sa-def.h"
 #include "file_op.h"
+#include "format.h"
 
 
 struct BP_t{
@@ -67,13 +68,25 @@ public:
     @param  *FM_fp          fd to write the compressed FM-index
     @param  *FM_meta_fp     fd for the meta file of the index
     @param  *SA_ref_fp      fd for storing the SA
+    @param  chrs_num        The number of chromosome in the reference
     @param  *fmt            the reconstructed fmt
     @param  *fmt_len        the length of reconstructed fmt
+    @param  nchar_clusters  vector that contains nchar_cluster_t
     @param  bucket_size     the size of a bucket
     @param  wpad            bool to make the length of BWT within a bucket a multiple of 2. 
                             This requires padding but forgos the use of divider.
 
 */
-void fmtToIdx(FILE *FM_fp, FILE * FM_meta_fp, FILE * SA_ref_fp, char *fmt, uint64_t fmt_len, uint32_t bucket_size, bool wpad);
+void fmtToIdx(FILE *FM_fp, 
+                FILE * FM_meta_fp, 
+                FILE * SA_ref_fp, 
+                uint16_t chrs_num,
+                char *fmt, 
+                uint64_t fmt_len,  
+                std::vector<nchar_cluster_t> &nchar_clusters, //TODO: uint64_t N_cluster, 
+                uint32_t bucket_size, 
+                bool wpad,
+                uint64_t ref_len,
+                bool is_rev);
 
 #endif //FM_SA_H

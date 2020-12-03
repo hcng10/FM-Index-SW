@@ -46,10 +46,12 @@ void writeFile(FILE *fp, void *data, uint64_t n_bytes)
     }
 }
 
-void writeNinfo(FILE * fp, u_int64_t ref_cnt, u_int64_t fmt_cnt, u_int32_t un_cnt){
 
-    fwrite(&ref_cnt, sizeof(char), sizeof(u_int64_t), fp);
-    fwrite(&fmt_cnt, sizeof(char), sizeof(u_int64_t), fp);
-    fwrite(&un_cnt, sizeof(char), sizeof(u_int32_t), fp);
+void writeNinfo(FILE * fp, uint64_t ref_cnt, uint64_t fmt_cnt, uint32_t un_cnt, uint64_t cum_un_cnt){
+
+    fwrite(&ref_cnt, sizeof(char), sizeof(uint64_t), fp);
+    fwrite(&fmt_cnt, sizeof(char), sizeof(uint64_t), fp);
+    fwrite(&un_cnt, sizeof(char), sizeof(uint32_t), fp);
+    fwrite(&cum_un_cnt, sizeof(char), sizeof(uint64_t), fp);
 
 }

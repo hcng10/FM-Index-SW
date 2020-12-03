@@ -11,7 +11,10 @@ void read_meta(FILE * FM_meta_fp,
                 uint32_t * bucket_bwt_len,
                 bool * wpad,
                 uint32_t * bucket_pad_size, 
-                uint64_t * endCharPos, uint8_t * endChar) {
+                uint64_t * end_char_pos, 
+                uint8_t * end_char,
+                uint64_t * N_cluster,
+                uint16_t * chrs_num) {
 
     //uint64_t fmt_len = 0;
 
@@ -29,16 +32,16 @@ void read_meta(FILE * FM_meta_fp,
         }
 
         for (uint8_t s = 0; s < FM_STEP; s++){
-            readFile(FM_meta_fp, endCharPos + s, sizeof(uint64_t));
-            cout<<"The val64 "<< (int)endCharPos[s]<<"\n";
+            readFile(FM_meta_fp, end_char_pos + s, sizeof(uint64_t));
+            cout<<"The val64 "<< (int)end_char_pos[s]<<"\n";
         }
 
         for (uint8_t s = 0; s < FM_STEP * FM_STEP; s++){
-            readFile(FM_meta_fp, endChar + s, sizeof(uint8_t));
-            cout<<"The val8 "<< (int)endChar[s]<<"\n";
+            readFile(FM_meta_fp, end_char + s, sizeof(uint8_t));
+            cout<<"The val8 "<< (int)end_char[s]<<"\n";
         }
     }else{
-        readFile(FM_meta_fp, endCharPos, sizeof(uint64_t));
+        readFile(FM_meta_fp, end_char_pos, sizeof(uint64_t));
     }
 
     readFile(FM_meta_fp, fmt_len, sizeof(uint64_t));
@@ -66,8 +69,11 @@ void read_meta(FILE * FM_meta_fp,
 
     readFile(FM_meta_fp, c32, sizeof(bool));
     readFile(FM_meta_fp, bucket_bwt_len, sizeof(uint32_t));
-    readFile(FM_meta_fp, bucket_pad_size, sizeof(uint32_t));
 
+    readFile(FM_meta_fp, N_cluster, sizeof(uint64_t));
+    readFile(FM_meta_fp, chrs_num, sizeof(uint16_t));
+
+    readFile(FM_meta_fp, bucket_pad_size, sizeof(uint32_t));
     readFile(FM_meta_fp, wpad, sizeof(bool));
 
     printf("The length of the reference %ld:\n", *fmt_len);
@@ -75,18 +81,8 @@ void read_meta(FILE * FM_meta_fp,
 
     printf("\t Size of bucket %d: \n", bucket_size);
     printf("\t The length of BWT within a bucket: %d \n", *bucket_bwt_len );
-    printf("\t The padding size (byte) within a bucket: %d \n", * bucket_pad_size );
+    printf("\t The padding size within a bucket: %d \n", * bucket_pad_size );
     
-    /*for (uint8_t s = 0; s < FM_STEP; s++){
-        for (uint8_t si = FM_STEP-1; si >= 0; si--){
-            si == FM_STEP-1 ?
-                printf("\t End Char in Bit: %d ", endCharPos[s*FM_STEP + si]):
-                printf("\t %d ", endCharPos[s*FM_STEP + si]);
-        }
-        printf("\n");
-    }*/
-
-    //cout<<" FM_BP_RANGE "<<FM_BP_RANGE<<" BWT32_LEN_BYTE "<<BWT32_LEN_BYTE<<" PAD32_LEN_BYTE "<<PAD32_LEN_BYTE<<" endCharBucket "<<*endCharPos<<" bucket_pad_size "<<bucket_pad_size<<"\n";
 }
 
 // get value in packed bwt
@@ -96,10 +92,6 @@ inline uint8_t getVal(uint8_t *bwt, uint32_t idx)
     uint8_t tmp = bwt[idx/(8/FM_BP_BIT)];
     tmp = (tmp >> (mod*FM_BP_BIT)) & 0x3;
 
-    //uint16_t tmp = (((uint16_t)bwt[((idx*5)/8)+1]) << 8) | bwt[(idx*5)/8];
-    //tmp = (tmp >> ((idx*5)%8)) & 0x1f;
-
-    //cerr<<"diu where wrong mod "<<(int)mod<<" index "<<idx/(8/FM_BP_BIT)<<"val "<<(int)tmp<< " ";
     return tmp;
 }
 

@@ -7,12 +7,32 @@
 
 
 #include <cstdlib>
+#include <string>
+#include <vector>
+#include <iostream>
+
 #include <omp.h>
+#include <stdint.h>
 
 #include "file_op.h"
 #include "../fm-sa-def.h"
 
+using namespace std;
+
 #define LINE_SIZE 512
+
+struct nchar_cluster_t{
+    uint64_t ref_cnt;
+    uint64_t fmt_cnt;
+    uint32_t un_cnt;
+    uint64_t cum_un_cnt;
+};
+
+struct chr_t{
+    string name;
+    uint64_t begin;
+    uint64_t end;
+};
 
 /**
     Format the input fasta file, compress the reference using 
@@ -27,8 +47,15 @@
     @param  &ref_cnt     to count the length of the reference
     @param  &N_cluster   to count the number of N nucleotide cluster
 */
-void faToFmt(FILE *fasta_fp, FILE * N_fp, char *fmt, uint8_t bit_for_bp, uint64_t & fmt_cnt,
-             uint64_t & ref_cnt, uint64_t & N_cluster); //uint64_t fa_len
+void faToFmt(FILE *fasta_fp, 
+            FILE * N_fp, 
+            char * fmt, 
+            uint8_t bit_for_bp, 
+            uint64_t & fmt_cnt,
+            uint64_t & ref_cnt, 
+            std::vector<nchar_cluster_t> &nchar_clusters,
+            std::vector<chr_t> &chrs); //uint64_t fa_len
+
 
 /**
     Use 1 byte (8 bit) to pack 4 nucleotides. With Open_MP, we iterate every
@@ -40,5 +67,19 @@ void faToFmt(FILE *fasta_fp, FILE * N_fp, char *fmt, uint8_t bit_for_bp, uint64_
     @param  *len         len of reconstructed ref
 */
 void packSymbols(char *sym, uint8_t *pck, uint8_t len);
+
+
+/**
+    Writes name of the chromosome with the following
+    (A) the starting point in the original reference (with N)
+    (B) the ending point in the original reference (with N)
+    (C) the length of the name
+    (D) the name 
+
+    @param  *fp         input fd for storing the name of the chromosome 
+    @param  &chrs       vector that contains all the chromosome info
+
+*/
+void writeChrName(FILE * fp, std::vector<chr_t> &chrs);
 
 #endif //FM_SA_H
