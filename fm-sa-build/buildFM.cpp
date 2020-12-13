@@ -109,17 +109,51 @@ inline uint64_t findNCharNum(uint64_t sa_val, std::vector<nchar_cluster_t> &ncha
         }
     }
 
+    uint32_t last = nchar_clusters.size()-1;
+    // Target index bigger or smaller than the indices of the N char cluster
+    if (sa_val < nchar_clusters[0].fmt_cnt) return sa_val;
+    if (sa_val > nchar_clusters[last].fmt_cnt) return nchar_clusters[last].cum_un_cnt + sa_val;
+
     uint32_t start = 0;
-    uint32_t end = nchar_clusters.size()-1;
+    uint32_t end = nchar_clusters.size();
     uint32_t mid = end / 2;
 
     uint32_t sel = 0;
 
-    // Target index bigger or smaller than the indices of the N char cluster
-    if (sa_val < nchar_clusters[0].fmt_cnt) return sa_val;
-    if (sa_val > nchar_clusters[end].fmt_cnt) return nchar_clusters[end].cum_un_cnt + sa_val;
+    while (start < end){
+        mid = (start + end) / 2;
 
-    while (start <= end){
+        if (sa_val == nchar_clusters[mid].fmt_cnt){
+            //if (sa_val >463 and sa_val <470){
+                //cout<<sa_val<<"   actuall "<< nchar_clusters[mid].cum_un_cnt + sa_val<<"\n";
+            //}
+            return nchar_clusters[mid].cum_un_cnt + sa_val;
+        }
+
+        if (sa_val < nchar_clusters[mid].fmt_cnt){
+            if (mid > 0 && sa_val > nchar_clusters[mid-1].fmt_cnt){
+                //if (sa_val >465 and sa_val <470){
+                    //cout<<sa_val<<"   minus one "<< nchar_clusters[mid-1].cum_un_cnt + sa_val<<"\n";
+                //}
+                return nchar_clusters[mid-1].cum_un_cnt + sa_val;
+            }
+            end = mid;
+        }
+        else{
+            if (mid < last && sa_val < nchar_clusters[mid+1].fmt_cnt){
+                //if (sa_val >465 and sa_val <470){
+                    //cout<<sa_val<<"   self "<< nchar_clusters[mid].cum_un_cnt + sa_val<<"\n";
+                //}
+
+                return nchar_clusters[mid].cum_un_cnt + sa_val;
+            }
+            start = mid + 1;
+        }
+    }
+    return nchar_clusters[mid].cum_un_cnt + sa_val;
+
+
+    /*while (start <= end){
         
         if (start == end){
             if (sa_val >= nchar_clusters[end].fmt_cnt){
@@ -147,7 +181,7 @@ inline uint64_t findNCharNum(uint64_t sa_val, std::vector<nchar_cluster_t> &ncha
         else if (sa_val == nchar_clusters[mid].fmt_cnt){
             return nchar_clusters[mid].cum_un_cnt + sa_val;
         }
-    }
+    }*/
 
     /*if (sa_val == nchar_clusters[mid].fmt_cnt)
         return nchar_clusters[mid].cum_un_cnt + sa_val;

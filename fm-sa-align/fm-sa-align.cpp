@@ -113,7 +113,8 @@ int main(int argc, char *argv[]) {
             cnt32[i] = (uint32_t) tmp_cnt;
 
             //DEBUG START:
-            //cout<<"cnt32 "<<i<<" "<< cnt32[i]<<"\n";
+            //
+            cout<<"cnt32 "<<i<<" "<< cnt32[i]<<"\n";
             //DEBUG END:
         }
 

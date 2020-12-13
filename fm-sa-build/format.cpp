@@ -33,7 +33,6 @@ void faToFmt(FILE *fasta_fp,
 
             // parse line
             while (line[i] > 32) {
-
                 char sym = toupper(line[i]);
 
                 if ((sym != 'A' && sym != 'C' && sym != 'G' && sym != 'T') && bit_for_bp == 2) {
